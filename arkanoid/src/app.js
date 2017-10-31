@@ -171,35 +171,34 @@ var GameLayer = cc.Layer.extend({
         var fila = 0;
         var columna = 0;
 
-        var framesBloqueCocodrilo = [], framesBloquePanda = [], framesBloqueTigre = [];
-        for (var i = 1; i <= 8; i++) {
-            var str = "cocodrilo" + i + ".png";
-            var frame = cc.spriteFrameCache.getSpriteFrame(str);
+        var framesBloqueCocodrilo = [], framesBloquePanda = []
+            , framesBloqueTigre = [], str, frame;
+        for (let i = 1; i <= 8; i++) {
+            str = "cocodrilo" + i + ".png";
+            frame = cc.spriteFrameCache.getSpriteFrame(str);
             framesBloqueCocodrilo.push(frame);
-        }
-        for (var i = 1; i <= 8; i++) {
-            var str = "panda" + i + ".png";
-            var frame = cc.spriteFrameCache.getSpriteFrame(str);
+            str = "panda" + i + ".png";
+            frame = cc.spriteFrameCache.getSpriteFrame(str);
             framesBloquePanda.push(frame);
-        }
-        for (var i = 1; i <= 8; i++) {
-            var str = "tigre" + i + ".png";
-            var frame = cc.spriteFrameCache.getSpriteFrame(str);
+            str = "tigre" + i + ".png";
+            frame = cc.spriteFrameCache.getSpriteFrame(str);
             framesBloqueTigre.push(frame);
         }
 
+        var aleatorio, animacionBloque
+            , accionAnimacionBloque, spriteBloqueActual;
         while (insertados < 50) {
-            var aleatorio = Math.floor(Math.random() * 3);
-            var animacionBloque;
+            aleatorio = Math.floor(Math.random() * 3);
+            animacionBloque;
             if (aleatorio == 0)
                 animacionBloque = new cc.Animation(framesBloqueCocodrilo, 0.1);
             else if (aleatorio == 1)
                 animacionBloque = new cc.Animation(framesBloquePanda, 0.1);
             else if (aleatorio == 2)
                 animacionBloque = new cc.Animation(framesBloqueTigre, 0.1);
-            var accionAnimacionBloque = new cc.RepeatForever(new cc.Animate(animacionBloque));
+            accionAnimacionBloque = new cc.RepeatForever(new cc.Animate(animacionBloque));
 
-            var spriteBloqueActual;
+            spriteBloqueActual;
             if (aleatorio == 0)
                 spriteBloqueActual = new cc.Sprite("#cocodrilo1.png");
             else if (aleatorio == 1)
