@@ -26,8 +26,8 @@ var GameLayer = cc.Layer.extend({
         this.inicializarBloques();
         var spriteFondo = cc.Sprite.create(res.fondo_png);
         spriteFondo.setPosition(cc.p(size.width / 2, size.height / 2));
-        spriteFondo.setScale( size.width / spriteFondo.width );
-        this.addChild(spriteFondo,-1);
+        spriteFondo.setScale(size.width / spriteFondo.width);
+        this.addChild(spriteFondo, -1);
         this.addChild(this.spriteBarra);
         this.addChild(this.spritePelota);
 
@@ -95,18 +95,6 @@ var GameLayer = cc.Layer.extend({
         return true;
     },
     procesarMouseDown: function (event) {
-        //alert("Pulsado ");
-        //console.log(event.getLocationX());
-        //console.log(event.getLocationY());
-
-        //var actionMoverPelotaAPunto =
-        //    cc.MoveTo.create(1,
-        //        cc.p(event.getLocationX(),
-        //            event.getLocationY()));
-
-        // Ambito procesarMouseDown
-
-        // Ambito procesarMouseDown
         var instancia = event.getCurrentTarget();
 
         cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteBarra, true);
@@ -165,11 +153,16 @@ var GameLayer = cc.Layer.extend({
         }
         if (this.spritePelota.y < 0 + mitadAlto) {
             cc.director.pause();
-            this.addChild(new GameOverLayer());        
+            this.addChild(new GameOverLayer());
         }
         if (this.spritePelota.y > cc.winSize.height - mitadAlto) {
             this.spritePelota.y = cc.winSize.height - mitadAlto;
             this.velocidadY = this.velocidadY * -1;
+        }
+
+        if (this.arrayBloques.length == 0) {
+            cc.director.pause();
+            this.addChild(new GameWinLayer());
         }
 
     },
@@ -178,28 +171,41 @@ var GameLayer = cc.Layer.extend({
         var fila = 0;
         var columna = 0;
 
-        var framesBloque = [];
+        var framesBloqueCocodrilo = [], framesBloquePanda = [], framesBloqueTigre = [];
         for (var i = 1; i <= 8; i++) {
             var str = "cocodrilo" + i + ".png";
             var frame = cc.spriteFrameCache.getSpriteFrame(str);
-            framesBloque.push(frame);
+            framesBloqueCocodrilo.push(frame);
         }
-        /*for (var i = 1; i <= 8; i++) {
+        for (var i = 1; i <= 8; i++) {
             var str = "panda" + i + ".png";
             var frame = cc.spriteFrameCache.getSpriteFrame(str);
-            framesBloque.push(frame);
+            framesBloquePanda.push(frame);
         }
         for (var i = 1; i <= 8; i++) {
             var str = "tigre" + i + ".png";
             var frame = cc.spriteFrameCache.getSpriteFrame(str);
-            framesBloque.push(frame);
-        }*/
-        var animacionBloque = new cc.Animation(framesBloque, 0.1);
+            framesBloqueTigre.push(frame);
+        }
 
-        while (insertados < 1) {
+        while (insertados < 50) {
+            var aleatorio = Math.floor(Math.random() * 3);
+            var animacionBloque;
+            if (aleatorio == 0)
+                animacionBloque = new cc.Animation(framesBloqueCocodrilo, 0.1);
+            else if (aleatorio == 1)
+                animacionBloque = new cc.Animation(framesBloquePanda, 0.1);
+            else if (aleatorio == 2)
+                animacionBloque = new cc.Animation(framesBloqueTigre, 0.1);
             var accionAnimacionBloque = new cc.RepeatForever(new cc.Animate(animacionBloque));
 
-            var spriteBloqueActual = new cc.Sprite("#cocodrilo1.png");
+            var spriteBloqueActual;
+            if (aleatorio == 0)
+                spriteBloqueActual = new cc.Sprite("#cocodrilo1.png");
+            else if (aleatorio == 1)
+                spriteBloqueActual = new cc.Sprite("#panda1.png");
+            else if (aleatorio == 2)
+                spriteBloqueActual = new cc.Sprite("#tigre1.png");
             spriteBloqueActual.runAction(accionAnimacionBloque);
 
             var x = (spriteBloqueActual.width / 2) +
@@ -223,10 +229,6 @@ var GameLayer = cc.Layer.extend({
         }
     }
 
-
-
-
-
 });
 
 var GameScene = cc.Scene.extend({
@@ -236,4 +238,3 @@ var GameScene = cc.Scene.extend({
         this.addChild(layer);
     }
 });
-
