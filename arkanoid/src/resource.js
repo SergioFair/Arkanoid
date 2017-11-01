@@ -12,6 +12,8 @@ var res = {
     cocodrilo_1_png : "res/cocodrilo_1.png",
     animacioncocodrilo_png : "res/animacioncocodrilo.png",
     animacioncocodrilo_plist : "res/animacioncocodrilo.plist",
+    animacionmono_png : "res/animacionmono.png",
+    animacionmono_plist : "res/animacionmono.plist",
     animacionpanda_png : "res/animacionpanda.png",
     animacionpanda_plist : "res/animacionpanda.plist",
     animaciontigre_png : "res/animaciontigre.png",

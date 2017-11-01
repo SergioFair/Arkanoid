@@ -6,22 +6,24 @@ var GameLayer = cc.Layer.extend({
     spriteBarra: null,
     keyPulsada: null,
     arrayBloques: [],
-    ctor: function () {
+    ctor: function (nivel) {
         this._super();
         cc.director.resume();
+        this.nivelActual = nivel;
         var size = cc.winSize;
 
         // cachear
         cc.spriteFrameCache.addSpriteFrames(res.animacioncocodrilo_plist);
         cc.spriteFrameCache.addSpriteFrames(res.animacionpanda_plist);
         cc.spriteFrameCache.addSpriteFrames(res.animaciontigre_plist);
+        cc.spriteFrameCache.addSpriteFrames(res.animacionmono_plist);
 
         this.velocidadX = 6;
         this.velocidadY = 3;
 
         this.spritePelota = cc.Sprite.create(res.bola_png);
         this.spritePelota.setPosition(cc.p(size.width / 2, size.height / 2));
-        this.spriteBarra = cc.Sprite.create(res.barra_2_png);
+        this.spriteBarra = cc.Sprite.create(res.barra_3_png);
         this.spriteBarra.setPosition(cc.p(size.width / 2, size.height * 0.1));
         this.inicializarBloques();
         var spriteFondo = cc.Sprite.create(res.fondo_png);
@@ -37,13 +39,6 @@ var GameLayer = cc.Layer.extend({
         var actionMoverPelota4 = cc.MoveBy.create(1, cc.p(0, -100));
         var secuencia = cc.Sequence.create(actionMoverPelota1, actionMoverPelota2, actionMoverPelota3, actionMoverPelota4);
         this.spritePelota.runAction(secuencia);
-
-
-        cc.eventManager.addListener({
-            event: cc.EventListener.MOUSE,
-            onMouseDown: this.procesarMouseDown
-        }, this)
-
 
         cc.eventManager.addListener({
             event: cc.EventListener.KEYBOARD,
@@ -90,6 +85,11 @@ var GameLayer = cc.Layer.extend({
 
         }, this);
 
+        cc.eventManager.addListener({
+            event: cc.EventListener.MOUSE,
+            onMouseDown: this.procesarMouseDown
+        }, this)
+
         this.scheduleUpdate();
 
         return true;
@@ -132,6 +132,15 @@ var GameLayer = cc.Layer.extend({
             if (cc.rectIntersectsRect(areaPelota, areaBloque)) {
                 var desaparecer = cc.fadeOut(0.5);
                 this.arrayBloques[i].runAction(desaparecer);
+                if (this.arrayBloques.length > 0 
+                    && this.arrayBloques[i].getSpriteFrame()._texture.url.includes("mono")
+                    && this.spriteBarra.getSpriteFrame()._texture.url.includes("3")) {
+                    let position = this.spriteBarra.getPosition();
+                    this.removeChild(this.spriteBarra);
+                    this.spriteBarra = new cc.Sprite.create(res.barra_1_png);
+                    this.spriteBarra.setPosition(cc.p(position.x, position.y));
+                    this.addChild(this.spriteBarra);
+                }
                 this.arrayBloques.splice(i, 1);
                 console.log("Quedan : " + this.arrayBloques.length);
                 destruido = true;
@@ -162,7 +171,7 @@ var GameLayer = cc.Layer.extend({
 
         if (this.arrayBloques.length == 0) {
             cc.director.pause();
-            this.addChild(new GameWinLayer());
+            this.addChild(new GameWinLayer(this.nivelActual + 0.2));
         }
 
     },
@@ -172,7 +181,8 @@ var GameLayer = cc.Layer.extend({
         var columna = 0;
 
         var framesBloqueCocodrilo = [], framesBloquePanda = []
-            , framesBloqueTigre = [], str, frame;
+            , framesBloqueTigre = [], framesBloqueMono = []
+            , str, frame;
         for (let i = 1; i <= 8; i++) {
             str = "cocodrilo" + i + ".png";
             frame = cc.spriteFrameCache.getSpriteFrame(str);
@@ -183,28 +193,34 @@ var GameLayer = cc.Layer.extend({
             str = "tigre" + i + ".png";
             frame = cc.spriteFrameCache.getSpriteFrame(str);
             framesBloqueTigre.push(frame);
+            str = "mono" + i + ".png";
+            frame = cc.spriteFrameCache.getSpriteFrame(str);
+            framesBloqueMono.push(frame);
         }
 
         var aleatorio, animacionBloque
             , accionAnimacionBloque, spriteBloqueActual;
         while (insertados < 50) {
-            aleatorio = Math.floor(Math.random() * 3);
+            aleatorio = Math.floor(Math.random() * 4);
             animacionBloque;
-            if (aleatorio == 0)
+            if (aleatorio == 0) {
                 animacionBloque = new cc.Animation(framesBloqueCocodrilo, 0.1);
-            else if (aleatorio == 1)
+                spriteBloqueActual = new cc.Sprite("#cocodrilo1.png");
+            }
+            else if (aleatorio == 1) {
                 animacionBloque = new cc.Animation(framesBloquePanda, 0.1);
-            else if (aleatorio == 2)
+                spriteBloqueActual = new cc.Sprite("#panda1.png");
+            }
+            else if (aleatorio == 2) {
                 animacionBloque = new cc.Animation(framesBloqueTigre, 0.1);
+                spriteBloqueActual = new cc.Sprite("#tigre1.png");
+            }
+            else if (aleatorio == 3) {
+                animacionBloque = new cc.Animation(framesBloqueMono, 0.1);
+                spriteBloqueActual = new cc.Sprite("#mono1.png");
+            }
             accionAnimacionBloque = new cc.RepeatForever(new cc.Animate(animacionBloque));
 
-            spriteBloqueActual;
-            if (aleatorio == 0)
-                spriteBloqueActual = new cc.Sprite("#cocodrilo1.png");
-            else if (aleatorio == 1)
-                spriteBloqueActual = new cc.Sprite("#panda1.png");
-            else if (aleatorio == 2)
-                spriteBloqueActual = new cc.Sprite("#tigre1.png");
             spriteBloqueActual.runAction(accionAnimacionBloque);
 
             var x = (spriteBloqueActual.width / 2) +
