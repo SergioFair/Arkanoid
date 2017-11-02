@@ -18,6 +18,8 @@ var res = {
     animacionpanda_plist : "res/animacionpanda.plist",
     animaciontigre_png : "res/animaciontigre.png",
     animaciontigre_plist : "res/animaciontigre.plist",
+    animacionkoala_png : "res/animacionkoala.png",
+    animacionkoala_plist : "res/animacionkoala.plist",
     fondo_2_png : "res/fondo_2.png",
     boton_reanudar_png : "res/boton_reanudar.png",
     boton_siguiente_png : "res/boton_siguiente.png",

@@ -9,6 +9,7 @@ var GameLayer = cc.Layer.extend({
     ctor: function (nivel) {
         this._super();
         cc.director.resume();
+        cc.audioEngine.playMusic(res.sonidobucle_wav, true);
         this.nivelActual = nivel;
         var size = cc.winSize;
 
@@ -17,6 +18,7 @@ var GameLayer = cc.Layer.extend({
         cc.spriteFrameCache.addSpriteFrames(res.animacionpanda_plist);
         cc.spriteFrameCache.addSpriteFrames(res.animaciontigre_plist);
         cc.spriteFrameCache.addSpriteFrames(res.animacionmono_plist);
+        cc.spriteFrameCache.addSpriteFrames(res.animacionkoala_plist);
 
         this.velocidadX = 6;
         this.velocidadY = 3;
@@ -32,13 +34,6 @@ var GameLayer = cc.Layer.extend({
         this.addChild(spriteFondo, -1);
         this.addChild(this.spriteBarra);
         this.addChild(this.spritePelota);
-
-        var actionMoverPelota1 = cc.MoveBy.create(1, cc.p(100, 0));
-        var actionMoverPelota2 = cc.MoveBy.create(1, cc.p(0, 100));
-        var actionMoverPelota3 = cc.MoveBy.create(1, cc.p(-100, 0));
-        var actionMoverPelota4 = cc.MoveBy.create(1, cc.p(0, -100));
-        var secuencia = cc.Sequence.create(actionMoverPelota1, actionMoverPelota2, actionMoverPelota3, actionMoverPelota4);
-        this.spritePelota.runAction(secuencia);
 
         cc.eventManager.addListener({
             event: cc.EventListener.KEYBOARD,
@@ -132,7 +127,8 @@ var GameLayer = cc.Layer.extend({
             if (cc.rectIntersectsRect(areaPelota, areaBloque)) {
                 var desaparecer = cc.fadeOut(0.5);
                 this.arrayBloques[i].runAction(desaparecer);
-                if (this.arrayBloques.length > 0 
+                cc.audioEngine.playEffect(res.grunt_wav);
+                if (this.arrayBloques.length > 0
                     && this.arrayBloques[i].getSpriteFrame()._texture.url.includes("mono")
                     && this.spriteBarra.getSpriteFrame()._texture.url.includes("3")) {
                     let position = this.spriteBarra.getPosition();
@@ -140,7 +136,13 @@ var GameLayer = cc.Layer.extend({
                     this.spriteBarra = new cc.Sprite.create(res.barra_1_png);
                     this.spriteBarra.setPosition(cc.p(position.x, position.y));
                     this.addChild(this.spriteBarra);
+                    } /*else if (this.arrayBloques.length > 0
+                    && this.arrayBloques[i].getSpriteFrame()._texture.url.includes("koala")) {
+                    this.destruirBloquesColindantes(i, desaparecer);
                 }
+                else {
+                    this.arrayBloques.splice(i, 1);
+                }*/
                 this.arrayBloques.splice(i, 1);
                 console.log("Quedan : " + this.arrayBloques.length);
                 destruido = true;
@@ -162,6 +164,7 @@ var GameLayer = cc.Layer.extend({
         }
         if (this.spritePelota.y < 0 + mitadAlto) {
             cc.director.pause();
+            cc.audioEngine.stopMusic();
             this.addChild(new GameOverLayer());
         }
         if (this.spritePelota.y > cc.winSize.height - mitadAlto) {
@@ -182,26 +185,39 @@ var GameLayer = cc.Layer.extend({
 
         var framesBloqueCocodrilo = [], framesBloquePanda = []
             , framesBloqueTigre = [], framesBloqueMono = []
-            , str, frame;
+            , framesBloqueKoala = [], str, frame;
         for (let i = 1; i <= 8; i++) {
+
+            // Cocodrilo
             str = "cocodrilo" + i + ".png";
             frame = cc.spriteFrameCache.getSpriteFrame(str);
             framesBloqueCocodrilo.push(frame);
+
+            // Panda
             str = "panda" + i + ".png";
             frame = cc.spriteFrameCache.getSpriteFrame(str);
             framesBloquePanda.push(frame);
+
+            // Tigre
             str = "tigre" + i + ".png";
             frame = cc.spriteFrameCache.getSpriteFrame(str);
             framesBloqueTigre.push(frame);
+
+            // Mono
             str = "mono" + i + ".png";
             frame = cc.spriteFrameCache.getSpriteFrame(str);
             framesBloqueMono.push(frame);
+
+            // Koala
+            str = "koala" + i + ".png";
+            frame = cc.spriteFrameCache.getSpriteFrame(str);
+            framesBloqueKoala.push(frame);
         }
 
         var aleatorio, animacionBloque
             , accionAnimacionBloque, spriteBloqueActual;
         while (insertados < 50) {
-            aleatorio = Math.floor(Math.random() * 4);
+            aleatorio = Math.floor(Math.random() * 5);
             animacionBloque;
             if (aleatorio == 0) {
                 animacionBloque = new cc.Animation(framesBloqueCocodrilo, 0.1);
@@ -218,6 +234,10 @@ var GameLayer = cc.Layer.extend({
             else if (aleatorio == 3) {
                 animacionBloque = new cc.Animation(framesBloqueMono, 0.1);
                 spriteBloqueActual = new cc.Sprite("#mono1.png");
+            }
+            else if (aleatorio == 4) {
+                animacionBloque = new cc.Animation(framesBloqueKoala, 0.1);
+                spriteBloqueActual = new cc.Sprite("#koala1.png");
             }
             accionAnimacionBloque = new cc.RepeatForever(new cc.Animate(animacionBloque));
 
@@ -242,9 +262,44 @@ var GameLayer = cc.Layer.extend({
                 fila++;
             }
         }
+    },
+    destruirBloquesColindantes: function(index, accion) {
+        let bloquesFila = Math.floor(cc.winSize.width / this.arrayBloques[0].width);
+        let posicionFila = Math.floor(bloquesFila * index / this.arrayBloques.length);
+        posicionFila--;
+        let fila = index % bloquesFila;
+    
+        //indexes after
+        if (index + bloquesFila - 1 < this.arrayBloques.length && index + bloquesFila - 1 >= 0
+            && this.arrayBloques[index + bloquesFila - 1] !== undefined) {
+            this.arrayBloques[index + bloquesFila - 1].runAction(accion);
+            this.arrayBloques.splice(index + bloquesFila - 1, 1);
+        }
+        if (index + 1 < this.arrayBloques.length && index + 1 >= 0
+            && this.arrayBloques[index + 1] !== undefined) {
+            this.arrayBloques[index + 1].runAction(accion);
+            this.arrayBloques.splice(index + 1, 1);
+        }
+    
+        //current index
+        this.arrayBloques[index].runAction(accion);
+        this.arrayBloques.splice(index, 1);
+    
+        //indexes before
+        if (index - 1 < this.arrayBloques.length && index - 1 >= 0
+            && this.arrayBloques[index - 1] !== undefined) {
+            this.arrayBloques[index - 1].runAction(accion);
+            this.arrayBloques.splice(index - 1, 1);
+        }
+        if (index - bloquesFila < this.arrayBloques.length && index - bloquesFila >= 0
+            && this.arrayBloques[index - bloquesFila] !== undefined) {
+            this.arrayBloques[index - bloquesFila].runAction(accion);
+            this.arrayBloques.splice(index - bloquesFila, 1);
+        }
     }
 
 });
+
 
 var GameScene = cc.Scene.extend({
     onEnter: function () {
