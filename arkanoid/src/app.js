@@ -25,7 +25,7 @@ var GameLayer = cc.Layer.extend({
 
         this.spritePelota = cc.Sprite.create(res.bola_png);
         this.spritePelota.setPosition(cc.p(size.width / 2, size.height / 2));
-        this.spriteBarra = cc.Sprite.create(res.barra_3_png);
+        this.spriteBarra = cc.Sprite.create(res.barra_2_png);
         this.spriteBarra.setPosition(cc.p(size.width / 2, size.height * 0.1));
         this.inicializarBloques();
         var spriteFondo = cc.Sprite.create(res.fondo_png);
@@ -130,13 +130,13 @@ var GameLayer = cc.Layer.extend({
                 cc.audioEngine.playEffect(res.grunt_wav);
                 if (this.arrayBloques.length > 0
                     && this.arrayBloques[i].getSpriteFrame()._texture.url.includes("mono")
-                    && this.spriteBarra.getSpriteFrame()._texture.url.includes("3")) {
-                    let position = this.spriteBarra.getPosition();
-                    this.removeChild(this.spriteBarra);
-                    this.spriteBarra = new cc.Sprite.create(res.barra_1_png);
-                    this.spriteBarra.setPosition(cc.p(position.x, position.y));
-                    this.addChild(this.spriteBarra);
-                    } /*else if (this.arrayBloques.length > 0
+                    && !this.spriteBarra.getSpriteFrame()._texture.url.includes("1")) {
+                    this.reduceBar();
+                } else if (this.arrayBloques.length > 0
+                    && this.arrayBloques[i].getSpriteFrame()._texture.url.includes("koala")
+                    && !this.spriteBarra.getSpriteFrame()._texture.url.includes("3")) {
+                    this.enlargeBar();
+                } /*else if (this.arrayBloques.length > 0
                     && this.arrayBloques[i].getSpriteFrame()._texture.url.includes("koala")) {
                     this.destruirBloquesColindantes(i, desaparecer);
                 }
@@ -177,6 +177,20 @@ var GameLayer = cc.Layer.extend({
             this.addChild(new GameWinLayer(this.nivelActual + 0.2));
         }
 
+    },
+    reduceBar: function () {
+        let position = this.spriteBarra.getPosition();
+        this.removeChild(this.spriteBarra);
+        this.spriteBarra = new cc.Sprite.create(res.barra_1_png);
+        this.spriteBarra.setPosition(cc.p(position.x, position.y));
+        this.addChild(this.spriteBarra);
+    },
+    enlargeBar: function () {
+        let position = this.spriteBarra.getPosition();
+        this.removeChild(this.spriteBarra);
+        this.spriteBarra = new cc.Sprite.create(res.barra_3_png);
+        this.spriteBarra.setPosition(cc.p(position.x, position.y));
+        this.addChild(this.spriteBarra);
     },
     inicializarBloques: function () {
         var insertados = 0;
@@ -263,12 +277,12 @@ var GameLayer = cc.Layer.extend({
             }
         }
     },
-    destruirBloquesColindantes: function(index, accion) {
+    destruirBloquesColindantes: function (index, accion) {
         let bloquesFila = Math.floor(cc.winSize.width / this.arrayBloques[0].width);
         let posicionFila = Math.floor(bloquesFila * index / this.arrayBloques.length);
         posicionFila--;
         let fila = index % bloquesFila;
-    
+
         //indexes after
         if (index + bloquesFila - 1 < this.arrayBloques.length && index + bloquesFila - 1 >= 0
             && this.arrayBloques[index + bloquesFila - 1] !== undefined) {
@@ -280,11 +294,11 @@ var GameLayer = cc.Layer.extend({
             this.arrayBloques[index + 1].runAction(accion);
             this.arrayBloques.splice(index + 1, 1);
         }
-    
+
         //current index
         this.arrayBloques[index].runAction(accion);
         this.arrayBloques.splice(index, 1);
-    
+
         //indexes before
         if (index - 1 < this.arrayBloques.length && index - 1 >= 0
             && this.arrayBloques[index - 1] !== undefined) {
