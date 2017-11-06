@@ -1,4 +1,6 @@
 
+var nivelActual = 0;
+
 var GameLayer = cc.Layer.extend({
     spritePelota: null,
     velocidadX: null,
@@ -6,11 +8,10 @@ var GameLayer = cc.Layer.extend({
     spriteBarra: null,
     keyPulsada: null,
     arrayBloques: [],
-    ctor: function (nivel) {
+    ctor: function () {
         this._super();
         cc.director.resume();
         cc.audioEngine.playMusic(res.sonidobucle_wav, true);
-        this.nivelActual = nivel;
         var size = cc.winSize;
 
         // cachear
@@ -108,8 +109,8 @@ var GameLayer = cc.Layer.extend({
         var mitadAlto = this.spritePelota.getContentSize().height / 2;
 
         // Nuevas posiciones
-        this.spritePelota.x = this.spritePelota.x + this.velocidadX;
-        this.spritePelota.y = this.spritePelota.y + this.velocidadY;
+        this.spritePelota.x = this.spritePelota.x + this.velocidadX*(1+nivelActual/10);
+        this.spritePelota.y = this.spritePelota.y + this.velocidadY*(1+nivelActual/10);
 
         //Colisiones
         var areaPelota = this.spritePelota.getBoundingBox();
@@ -165,6 +166,7 @@ var GameLayer = cc.Layer.extend({
         if (this.spritePelota.y < 0 + mitadAlto) {
             cc.director.pause();
             cc.audioEngine.stopMusic();
+            nivelActual = 0;
             this.addChild(new GameOverLayer());
         }
         if (this.spritePelota.y > cc.winSize.height - mitadAlto) {
@@ -174,7 +176,8 @@ var GameLayer = cc.Layer.extend({
 
         if (this.arrayBloques.length == 0) {
             cc.director.pause();
-            this.addChild(new GameWinLayer(this.nivelActual + 0.2));
+            nivelActual++;
+            this.addChild(new GameWinLayer());
         }
 
     },
