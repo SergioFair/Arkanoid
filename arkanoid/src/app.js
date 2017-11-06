@@ -109,8 +109,8 @@ var GameLayer = cc.Layer.extend({
         var mitadAlto = this.spritePelota.getContentSize().height / 2;
 
         // Nuevas posiciones
-        this.spritePelota.x = this.spritePelota.x + this.velocidadX*(1+nivelActual/10);
-        this.spritePelota.y = this.spritePelota.y + this.velocidadY*(1+nivelActual/10);
+        this.spritePelota.x = this.spritePelota.x + this.velocidadX * (1 + nivelActual / 10);
+        this.spritePelota.y = this.spritePelota.y + this.velocidadY * (1 + nivelActual / 10);
 
         //Colisiones
         var areaPelota = this.spritePelota.getBoundingBox();
@@ -233,7 +233,7 @@ var GameLayer = cc.Layer.extend({
 
         var aleatorio, animacionBloque
             , accionAnimacionBloque, spriteBloqueActual;
-        while (insertados < 50) {
+        while (nivelActual < 10 ? insertados < 50 + nivelActual : insertados < 80) {
             aleatorio = Math.floor(Math.random() * 5);
             animacionBloque;
             if (aleatorio == 0) {
